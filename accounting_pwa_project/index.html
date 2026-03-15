@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>نظام المحاسبة</title>
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="css/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Amiri&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+
+<header>
+<h1>نظام إدارة العمليات</h1>
+</header>
+
+<section class="form-box">
+
+<h2>معاملة جديدة</h2>
+
+<label>نوع العملية</label>
+<select id="type">
+<option>بيع</option>
+<option>شراء</option>
+<option>دفعة</option>
+<option>مصاريف</option>
+</select>
+
+<label>الحساب</label>
+<input id="account">
+
+<label>الوزن</label>
+<input id="weight" type="number">
+
+<label>الكثافة</label>
+<input id="density" type="number">
+
+<label>سعر البرميل ($)</label>
+<input id="price" type="number">
+
+<button onclick="saveTransaction()">حفظ</button>
+
+</section>
+
+<section>
+<h2>العمليات</h2>
+<table id="table">
+<thead>
+<tr>
+<th>التاريخ</th>
+<th>العملية</th>
+<th>الحساب</th>
+<th>الوزن</th>
+<th>السعر</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+</section>
+
+<script src="js/app.js"></script>
+
+<script>
+if ('serviceWorker' in navigator) {
+navigator.serviceWorker.register('service-worker.js');
+}
+</script>
+
+</body>
+</html>
