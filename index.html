@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#2c3e50" />
+  <meta name="description" content="نظام محاسبة احترافي متكامل" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="المحاسب الذكي" />
+  <title>المحاسب الذكي</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="assets/icons/icon-192.png" />
+  <link rel="icon" type="image/png" href="assets/icons/icon-192.png" />
+
+  <!-- Bootstrap 5 RTL -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" />
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
+
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <style>
+    /* ===== BASE ===== */
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Amiri', serif;
+      background-color: #f5f7fa;
+      color: #333;
+      direction: rtl;
+    }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      height: 100vh;
+      background: #2c3e50;
+      color: #fff;
+      position: fixed;
+      right: 0;
+      top: 0;
+      width: 260px;
+      padding-top: 0;
+      z-index: 1000;
+      overflow-y: auto;
+      transition: transform .3s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar-brand {
+      padding: 16px 20px 18px;
+      border-bottom: 1px solid rgba(255,255,255,.1);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .sidebar-brand .brand-icon {
+      width: 42px; height: 42px;
+      background: #3498db;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem; flex-shrink: 0;
+    }
+    .sidebar-brand h4 { margin: 0; font-size: 1.05rem; font-weight: 700; line-height: 1.2; }
+    .sidebar-brand small { font-size: .72rem; opacity: .55; }
+
+    .sidebar-nav { flex: 1; padding: 8px 0; }
+
+    .sidebar a {
+      padding: 13px 22px;
+      text-decoration: none;
+      font-size: .98rem;
+      color: #bdc3c7;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: .22s;
+      border-right: 3px solid transparent;
+    }
+    .sidebar a:hover, .sidebar a.active {
+      color: #fff;
+      background: #34495e;
+      border-right-color: #3498db;
+    }
+    .sidebar a i { width: 20px; text-align: center; font-size: 1rem; }
+
+    .sidebar-footer {
+      padding: 12px 16px;
+      border-top: 1px solid rgba(255,255,255,.1);
+      font-size: .82rem;
+      color: rgba(255,255,255,.45);
+    }
+    .user-row {
+      display: flex; align-items: center; gap: 8px;
+      color: rgba(255,255,255,.75); margin-bottom: 8px;
+    }
+    .user-row .user-name { font-size: .9rem; color: #fff; }
+    .user-row .user-role { font-size: .75rem; }
+
+    /* ===== MAIN CONTENT ===== */
+    .main-content {
+      margin-right: 260px;
+      padding: 22px;
+      min-height: 100vh;
+      transition: margin .3s ease;
+    }
+
+    /* ===== TOPBAR ===== */
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 22px;
+      background: #fff;
+      padding: 12px 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    }
+    .topbar-title { flex: 1; font-size: 1.25rem; font-weight: 700; color: #2c3e50; margin: 0; }
+    .topbar-date {
+      font-size: .83rem; color: #7f8c8d;
+      background: #f0f4f8; padding: 5px 12px; border-radius: 20px;
+    }
+    #menu-toggle {
+      display: none; background: none; border: none;
+      font-size: 1.4rem; color: #2c3e50; cursor: pointer; padding: 4px 8px;
+    }
+
+    /* ===== CARDS ===== */
+    .card {
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 3px 12px rgba(0,0,0,.08);
+      margin-bottom: 20px;
+    }
+    .card-header {
+      background: #ecf0f1;
+      font-weight: bold;
+      border-bottom: 2px solid #d5dbdb;
+      border-radius: 12px 12px 0 0 !important;
+      padding: 13px 18px;
+      font-size: 1rem;
+      color: #2c3e50;
+    }
+
+    /* ===== STAT CARDS ===== */
+    .stat-card {
+      border-radius: 12px; padding: 20px; color: #fff;
+      position: relative; overflow: hidden; transition: transform .2s;
+    }
+    .stat-card:hover { transform: translateY(-3px); }
+    .stat-card::after {
+      content: ''; position: absolute;
+      right: -20px; bottom: -20px;
+      width: 100px; height: 100px;
+      border-radius: 50%; background: rgba(255,255,255,.1);
+    }
+    .stat-card h6 { opacity: .85; font-size: .87rem; margin-bottom: 5px; }
+    .stat-card h3 { font-size: 1.9rem; font-weight: 700; margin: 0; }
+    .stat-card small { opacity: .7; font-size: .8rem; }
+    .stat-card .stat-icon {
+      position: absolute; left: 18px; top: 50%;
+      transform: translateY(-50%); font-size: 2.4rem; opacity: .18;
+    }
+
+    /* ===== TABLES ===== */
+    .table { font-size: .88rem; }
+    .table thead th {
+      background: #2c3e50; color: #fff; text-align: center;
+      vertical-align: middle; border: none;
+      padding: 10px 7px; white-space: nowrap;
+    }
+    .table td { text-align: center; vertical-align: middle; padding: 8px 6px; }
+    .table-hover tbody tr:hover { background: rgba(52,152,219,.05); }
+
+    .row-normal { background: rgba(39,174,96,.07); }
+    .row-payment { background: rgba(231,76,60,.07); }
+    .row-expense { background: rgba(230,126,34,.07); }
+    .row-purchase { background: rgba(41,128,185,.07); }
+
+    /* ===== TYPE BADGES ===== */
+    .type-badge {
+      display: inline-block; padding: 3px 10px;
+      border-radius: 12px; font-size: .8rem; font-weight: 600; white-space: nowrap;
+    }
+    .type-بيع { background: rgba(39,174,96,.15); color: #1e8449; }
+    .type-شراء { background: rgba(41,128,185,.15); color: #1a5276; }
+    .type-دفعة { background: rgba(231,76,60,.15); color: #c0392b; }
+    .type-مصاريف { background: rgba(230,126,34,.15); color: #784212; }
+
+    /* ===== FORMS ===== */
+    .form-label { font-weight: 600; font-size: .89rem; margin-bottom: 4px; color: #2c3e50; }
+    .form-control, .form-select {
+      font-family: 'Amiri', serif; font-size: .95rem;
+      border: 1.5px solid #dce3eb; border-radius: 8px; direction: rtl;
+    }
+    .form-control:focus, .form-select:focus {
+      border-color: #3498db;
+      box-shadow: 0 0 0 3px rgba(52,152,219,.12);
+    }
+    .readonly-field { background: #f0f4f8 !important; color: #7f8c8d; }
+    .total-field { font-size: 1.15rem !important; font-weight: 700 !important; color: #2c3e50 !important; text-align: center; }
+
+    /* ===== FUEL SECTION ===== */
+    #fuel-section {
+      background: rgba(52,152,219,.05);
+      border: 1px dashed rgba(52,152,219,.3);
+      border-radius: 10px; padding: 16px;
+    }
+    .section-label {
+      font-size: .88rem; font-weight: 700; color: #2980b9;
+      margin-bottom: 12px; display: flex; align-items: center; gap: 6px;
+    }
+
+    /* ===== BUTTONS ===== */
+    .btn { font-family: 'Amiri', serif; border-radius: 8px; }
+    .btn-primary { background: #2980b9; border: none; }
+    .btn-primary:hover { background: #3498db; }
+    .btn-icon {
+      background: none; border: none; cursor: pointer;
+      padding: 4px 6px; border-radius: 6px; font-size: 1rem;
+      transition: background .2s;
+    }
+    .btn-icon:hover { background: #f0f4f8; }
+
+    /* ===== CASHBOX ===== */
+    .cashbox-card {
+      background: #fff; border-radius: 12px;
+      box-shadow: 0 3px 12px rgba(0,0,0,.08);
+      padding: 24px; text-align: center;
+      border-top: 4px solid #3498db; transition: transform .2s;
+    }
+    .cashbox-card:hover { transform: translateY(-3px); }
+    .cashbox-currency { font-size: 1.2rem; font-weight: 700; color: #7f8c8d; }
+    .cashbox-amount { font-size: 1.9rem; font-weight: 700; color: #2c3e50; }
+    .cashbox-amount.negative { color: #e74c3c; }
+    .cashbox-label { font-size: .82rem; color: #95a5a6; margin-top: 4px; }
+
+    /* ===== CHARTS ===== */
+    .chart-container { position: relative; height: 280px; }
+
+    /* ===== REPORTS SUMMARY ===== */
+    .summary-item {
+      background: #f8f9fa; border-radius: 8px;
+      padding: 14px; text-align: center; border: 1px solid #ecf0f1;
+    }
+    .summary-item .s-label { font-size: .82rem; color: #7f8c8d; }
+    .summary-item .s-value { font-size: 1.3rem; font-weight: 700; color: #2c3e50; }
+
+    /* ===== STATEMENT ===== */
+    .stmt-summary-bar {
+      display: flex; gap: 10px; flex-wrap: wrap;
+    }
+    .stmt-pill {
+      padding: 4px 12px; border-radius: 20px;
+      font-size: .85rem; font-weight: 700;
+    }
+
+    /* ===== SETTINGS ===== */
+    .settings-section {
+      background: #fff; border-radius: 12px;
+      padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,.07);
+      height: 100%;
+    }
+    .settings-section h5 {
+      color: #2c3e50; font-weight: 700;
+      padding-bottom: 10px; border-bottom: 1px solid #ecf0f1; margin-bottom: 16px;
+    }
+    .currency-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 7px 10px; background: #f8f9fa; border-radius: 8px;
+      margin-bottom: 6px; border: 1px solid #ecf0f1;
+    }
+
+    /* ===== API TEST ===== */
+    .api-test-result {
+      padding: 8px 12px; border-radius: 8px; font-size: .88rem; display: none;
+    }
+    .api-test-result.success {
+      display: block; background: rgba(39,174,96,.1); color: #1e8449;
+      border: 1px solid rgba(39,174,96,.2);
+    }
+    .api-test-result.error {
+      display: block; background: rgba(231,76,60,.1); color: #c0392b;
+      border: 1px solid rgba(231,76,60,.2);
+    }
+
+    /* ===== LOADING ===== */
+    .loading-overlay {
+      position: fixed; inset: 0; background: rgba(255,255,255,.9);
+      z-index: 9999; display: none;
+      justify-content: center; align-items: center; flex-direction: column;
+    }
+    .loading-overlay.active { display: flex; }
+
+    /* ===== LOGIN ===== */
+    #login-screen {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #2c3e50 0%, #1a252f 60%, #0d1b2a 100%);
+      display: none; align-items: center; justify-content: center;
+    }
+    #login-screen.active { display: flex; }
+
+    .login-box {
+      background: #fff; border-radius: 16px; padding: 40px 36px;
+      width: 100%; max-width: 420px;
+      box-shadow: 0 10px 40px rgba(0,0,0,.3);
+    }
+    .login-logo { text-align: center; margin-bottom: 28px; }
+    .login-logo .icon {
+      width: 68px; height: 68px;
+      background: linear-gradient(135deg, #2980b9, #3498db);
+      border-radius: 20px; display: flex; align-items: center;
+      justify-content: center; font-size: 2rem; color: #fff; margin: 0 auto 12px;
+    }
+    .login-logo h3 { font-size: 1.5rem; color: #2c3e50; margin-bottom: 4px; }
+    .login-hint { font-size: .8rem; color: #95a5a6; text-align: center; margin-top: 10px; }
+
+    /* ===== MODAL ===== */
+    .modal-header {
+      background: linear-gradient(135deg, #2c3e50, #34495e);
+      color: #fff; border-radius: 12px 12px 0 0 !important;
+    }
+    .modal-header .btn-close { filter: invert(1); }
+    .modal-title { font-size: 1.02rem; font-weight: 700; }
+
+    /* ===== PAGINATION ===== */
+    .page-link { font-family: 'Amiri', serif; color: #2980b9; }
+    .page-item.active .page-link { background: #2980b9; border-color: #2980b9; }
+
+    /* ===== SIDEBAR OVERLAY ===== */
+    .sidebar-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.5); z-index: 999;
+    }
+
+    /* ===== DARK THEME ===== */
+    [data-theme="dark"] body { background: #0f1923; color: #e8edf2; }
+    [data-theme="dark"] .card { background: #1a2530; border: 1px solid #2a3a4a; }
+    [data-theme="dark"] .card-header { background: #243040; color: #e8edf2; border-color: #2a3a4a; }
+    [data-theme="dark"] .topbar { background: #1a2530; }
+    [data-theme="dark"] .form-control, [data-theme="dark"] .form-select {
+      background: #1a2530; color: #e8edf2; border-color: #2a3a4a;
+    }
+
+    /* ===== PRINT ===== */
+    @media print {
+      .sidebar, .no-print { display: none !important; }
+      .main-content { margin: 0 !important; padding: 0 !important; }
+      .card { box-shadow: none !important; border: 1px solid #ccc !important; }
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(100%); }
+      .sidebar.open { transform: translateX(0); }
+      .sidebar-overlay.active { display: block; }
+      .main-content { margin-right: 0; padding: 14px; }
+      #menu-toggle { display: block; }
+      .stat-card h3 { font-size: 1.4rem; }
+    }
+
+    /* number / date LTR */
+    input[type=number], input[type=date] { direction: ltr; text-align: right; }
+
+    /* scrollbar */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-thumb { background: #aab; border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+<!-- ===== LOADING ===== -->
+<div class="loading-overlay" id="loading-overlay">
+  <div class="spinner-border text-primary mb-3" style="width:48px;height:48px;" role="status"></div>
+  <p class="text-muted">جاري التحميل...</p>
+</div>
+
+<!-- ===== LOGIN ===== -->
+<div id="login-screen" class="active">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="icon"><i class="fas fa-calculator"></i></div>
+      <h3 id="login-company-name">المحاسب الذكي</h3>
+      <p class="text-muted" style="font-size:.88rem;">نظام المحاسبة الاحترافي</p>
+    </div>
+    <form id="login-form">
+      <div class="mb-3">
+        <label class="form-label">اسم المستخدم</label>
+        <input type="text" id="login-username" class="form-control" placeholder="admin" autocomplete="username" />
+      </div>
+      <div class="mb-3">
+        <label class="form-label">كلمة المرور</label>
+        <input type="password" id="login-password" class="form-control" placeholder="••••" autocomplete="current-password" />
+      </div>
+      <button type="submit" class="btn btn-primary w-100 py-2">
+        <i class="fas fa-sign-in-alt me-2"></i>دخول
+      </button>
+    </form>
+    <p class="login-hint">المستخدم الافتراضي: admin / 1234</p>
+  </div>
+</div>
+
+<!-- ===== APP ===== -->
+<div id="app-screen" style="display:none;">
+
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+  <!-- Sidebar -->
+  <nav class="sidebar no-print" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon"><i class="fas fa-calculator"></i></div>
+      <div>
+        <h4 id="sidebar-company-name">المحاسب الذكي</h4>
+        <small>نظام محاسبة متكامل</small>
+      </div>
+    </div>
+    <div class="sidebar-nav">
+      <a href="#" class="active" data-page="dashboard"><i class="fas fa-tachometer-alt"></i>لوحة التحكم</a>
+      <a href="#" data-page="transactions"><i class="fas fa-exchange-alt"></i>إدارة العمليات</a>
+      <a href="#" data-page="accounts"><i class="fas fa-users"></i>الحسابات</a>
+      <a href="#" data-page="statement"><i class="fas fa-file-invoice-dollar"></i>كشف الحساب</a>
+      <a href="#" data-page="cashbox"><i class="fas fa-cash-register"></i>الصندوق</a>
+      <a href="#" data-page="reports"><i class="fas fa-chart-bar"></i>التقارير</a>
+      <a href="#" data-page="settings"><i class="fas fa-cog"></i>الإعدادات</a>
+    </div>
+    <div class="sidebar-footer">
+      <div class="user-row">
+        <i class="fas fa-user-circle fa-lg"></i>
+        <div>
+          <div class="user-name" id="sidebar-user-name">admin</div>
+          <div class="user-role">مدير النظام</div>
+        </div>
+      </div>
+      <button class="btn btn-sm w-100" id="btn-logout"
+        style="background:rgba(231,76,60,.2);color:#ff8080;border:none;border-radius:8px;">
+        <i class="fas fa-sign-out-alt me-1"></i>خروج
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <div class="main-content">
+
+    <!-- Topbar -->
+    <div class="topbar no-print">
+      <button id="menu-toggle"><i class="fas fa-bars"></i></button>
+      <h5 class="topbar-title" id="page-title">لوحة التحكم</h5>
+      <span class="topbar-date" id="current-date"></span>
+      <span id="sync-status" title="حالة المزامنة" style="cursor:pointer;font-size:1.1rem;">🔄</span>
+    </div>
+
+    <!-- ======= DASHBOARD ======= -->
+    <section id="page-dashboard" class="page active">
+      <div class="row g-3 mb-4">
+        <div class="col-6 col-lg-3">
+          <div class="stat-card" style="background:linear-gradient(135deg,#27ae60,#2ecc71);">
+            <i class="fas fa-arrow-trend-up stat-icon"></i>
+            <h6>إجمالي المبيعات</h6>
+            <h3 id="dash-sales">0</h3>
+            <small>USD</small>
+          </div>
+        </div>
+        <div class="col-6 col-lg-3">
+          <div class="stat-card" style="background:linear-gradient(135deg,#2980b9,#3498db);">
+            <i class="fas fa-shopping-cart stat-icon"></i>
+            <h6>إجمالي المشتريات</h6>
+            <h3 id="dash-purchases">0</h3>
+            <small>USD</small>
+          </div>
+        </div>
+        <div class="col-6 col-lg-3">
+          <div class="stat-card" style="background:linear-gradient(135deg,#e74c3c,#c0392b);">
+            <i class="fas fa-hand-holding-usd stat-icon"></i>
+            <h6>إجمالي الدفعات</h6>
+            <h3 id="dash-payments">0</h3>
+            <small>USD</small>
+          </div>
+        </div>
+        <div class="col-6 col-lg-3">
+          <div class="stat-card" style="background:linear-gradient(135deg,#f39c12,#e67e22);">
+            <i class="fas fa-receipt stat-icon"></i>
+            <h6>المصاريف</h6>
+            <h3 id="dash-expenses">0</h3>
+            <small>USD</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-lg-8">
+          <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <span><i class="fas fa-clock-rotate-left me-2"></i>آخر العمليات</span>
+              <button class="btn btn-sm btn-primary no-print" data-page="transactions">عرض الكل</button>
+            </div>
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                  <thead>
+                    <tr><th>النوع</th><th>الحساب</th><th>المبلغ</th><th>التاريخ</th></tr>
+                  </thead>
+                  <tbody id="dash-recent-body">
+                    <tr><td colspan="4" class="text-muted text-center py-3">لا توجد عمليات</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-4">
+          <div class="card h-100">
+            <div class="card-header"><i class="fas fa-wallet me-2"></i>أرصدة الصندوق</div>
+            <div class="card-body">
+              <div class="d-flex justify-content-between py-2 border-bottom">
+                <strong class="text-primary">USD</strong>
+                <strong id="dash-usd">0.00</strong>
+              </div>
+              <div class="d-flex justify-content-between py-2 border-bottom">
+                <strong class="text-warning">TRY</strong>
+                <strong id="dash-try">0.00</strong>
+              </div>
+              <div class="d-flex justify-content-between py-2">
+                <strong class="text-success">SYP</strong>
+                <strong id="dash-syp">0.00</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======= TRANSACTIONS ======= -->
+    <section id="page-transactions" class="page" style="display:none;">
+      <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3 no-print">
+        <div class="d-flex gap-2 flex-wrap align-items-end">
+          <div>
+            <label class="form-label mb-1" style="font-size:.8rem;">النوع</label>
+            <select class="form-select form-select-sm" id="filter-type" style="width:120px;">
+              <option value="">الكل</option>
+              <option value="بيع">بيع</option>
+              <option value="شراء">شراء</option>
+              <option value="دفعة">دفعة</option>
+              <option value="مصاريف">مصاريف</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label mb-1" style="font-size:.8rem;">الحساب</label>
+            <select class="form-select form-select-sm" id="filter-account" style="width:150px;">
+              <option value="">الكل</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label mb-1" style="font-size:.8rem;">من</label>
+            <input type="date" class="form-control form-control-sm" id="filter-date-from" style="width:140px;" />
+          </div>
+          <div>
+            <label class="form-label mb-1" style="font-size:.8rem;">إلى</label>
+            <input type="date" class="form-control form-control-sm" id="filter-date-to" style="width:140px;" />
+          </div>
+          <div class="d-flex gap-2 align-items-end">
+            <button class="btn btn-sm btn-primary" id="btn-filter"><i class="fas fa-filter me-1"></i>تصفية</button>
+            <button class="btn btn-sm btn-outline-secondary" id="btn-reset-filter">إعادة</button>
+          </div>
+        </div>
+        <div class="d-flex gap-2 align-items-end">
+          <button class="btn btn-sm btn-outline-success" id="btn-export-csv"><i class="fas fa-file-csv me-1"></i>CSV</button>
+          <button class="btn btn-sm btn-outline-primary" id="btn-export-excel"><i class="fas fa-file-excel me-1"></i>Excel</button>
+          <button class="btn btn-primary" id="btn-new-transaction"><i class="fas fa-plus me-1"></i>معاملة جديدة</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead>
+                <tr>
+                  <th>#</th><th>النوع</th><th>طريقة الدفع</th><th>الحساب</th>
+                  <th>الوقود</th><th>الوزن</th><th>الكثافة</th><th>البراميل</th>
+                  <th>السعر/برميل</th><th>المبلغ</th><th>ع1</th>
+                  <th>مبلغ2</th><th>ع2</th>
+                  <th>التاريخ</th><th>ملاحظات</th>
+                  <th class="no-print">إجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="transactions-body">
+                <tr><td colspan="16" class="text-muted text-center py-4">لا توجد عمليات</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <nav class="d-flex justify-content-center mt-2">
+        <ul class="pagination pagination-sm" id="transactions-pagination"></ul>
+      </nav>
+    </section>
+
+    <!-- ======= ACCOUNTS ======= -->
+    <section id="page-accounts" class="page" style="display:none;">
+      <div class="d-flex justify-content-end mb-3 no-print">
+        <button class="btn btn-primary" id="btn-new-account">
+          <i class="fas fa-user-plus me-1"></i>حساب جديد
+        </button>
+      </div>
+      <div class="card">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead>
+                <tr>
+                  <th>#</th><th>اسم الحساب</th><th>النوع</th><th>الهاتف</th>
+                  <th>الرصيد (USD)</th><th>ملاحظات</th>
+                  <th class="no-print">إجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="accounts-body">
+                <tr><td colspan="7" class="text-muted text-center py-4">لا توجد حسابات</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======= STATEMENT ======= -->
+    <section id="page-statement" class="page" style="display:none;">
+      <div class="card no-print">
+        <div class="card-body">
+          <div class="row g-2 align-items-end">
+            <div class="col-md-4">
+              <label class="form-label">اختر الحساب</label>
+              <select class="form-select" id="statement-account">
+                <option value="">-- اختر حساباً --</option>
+              </select>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">من تاريخ</label>
+              <input type="date" class="form-control" id="statement-date-from" />
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">إلى تاريخ</label>
+              <input type="date" class="form-control" id="statement-date-to" />
+            </div>
+            <div class="col-md-2">
+              <button class="btn btn-primary w-100" id="btn-get-statement">
+                <i class="fas fa-search me-1"></i>عرض
+              </button>
+            </div>
+            <div class="col-md-2">
+              <button class="btn btn-outline-success w-100" id="btn-print-statement" onclick="window.print()">
+                <i class="fas fa-print me-1"></i>طباعة / PDF
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="statement-card" class="card" style="display:none;">
+        <div class="card-header d-flex justify-content-between flex-wrap gap-2 align-items-center">
+          <span id="statement-title" class="fw-bold"></span>
+          <div class="stmt-summary-bar">
+            <span class="stmt-pill" style="background:rgba(39,174,96,.1);color:#1e8449;">
+              مبيعات: <strong id="stmt-total-sales">0</strong> USD
+            </span>
+            <span class="stmt-pill" style="background:rgba(231,76,60,.1);color:#c0392b;">
+              دفعات: <strong id="stmt-total-payments">0</strong> USD
+            </span>
+            <span class="stmt-pill" style="background:rgba(41,128,185,.1);color:#1a5276;">
+              الرصيد: <strong id="stmt-balance">0</strong>
+            </span>
+          </div>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-bordered mb-0">
+              <thead>
+                <tr>
+                  <th>#</th><th>نوع العملية</th><th>نوع الوقود</th>
+                  <th>الوزن</th><th>الكثافة</th><th>البراميل</th>
+                  <th>سعر البرميل</th><th>المبلغ</th>
+                  <th>طريقة الدفع</th><th>التاريخ</th><th>ملاحظات</th>
+                </tr>
+              </thead>
+              <tbody id="statement-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======= CASHBOX ======= -->
+    <section id="page-cashbox" class="page" style="display:none;">
+      <div class="row g-3 mb-4" id="cashbox-grid"></div>
+
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center no-print">
+          <span><i class="fas fa-list-check me-2"></i>تفاصيل الحركة</span>
+          <div class="d-flex gap-2">
+            <select class="form-select form-select-sm" id="cashbox-currency-filter" style="width:100px;">
+              <option value="USD">USD</option>
+              <option value="TRY">TRY</option>
+              <option value="SYP">SYP</option>
+            </select>
+            <button class="btn btn-sm btn-primary" id="btn-cashbox-filter">عرض</button>
+          </div>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead>
+                <tr><th>النوع</th><th>الحساب</th><th>المبلغ</th><th>التاريخ</th><th>ملاحظات</th></tr>
+              </thead>
+              <tbody id="cashbox-details-body">
+                <tr><td colspan="5" class="text-muted text-center py-3">اختر العملة ثم اضغط عرض</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======= REPORTS ======= -->
+    <section id="page-reports" class="page" style="display:none;">
+      <div class="card no-print mb-3">
+        <div class="card-body">
+          <div class="row g-2 align-items-end">
+            <div class="col-md-3">
+              <label class="form-label">الفترة</label>
+              <select class="form-select" id="report-period">
+                <option value="month">هذا الشهر</option>
+                <option value="quarter">هذا الربع</option>
+                <option value="year">هذا العام</option>
+                <option value="custom">مخصص</option>
+              </select>
+            </div>
+            <div class="col-md-2" id="report-custom-dates" style="display:none;">
+              <label class="form-label">من</label>
+              <input type="date" class="form-control" id="report-date-from" />
+            </div>
+            <div class="col-md-2" id="report-custom-dates2" style="display:none;">
+              <label class="form-label">إلى</label>
+              <input type="date" class="form-control" id="report-date-to" />
+            </div>
+            <div class="col-md-2">
+              <button class="btn btn-primary w-100" id="btn-generate-report">
+                <i class="fas fa-chart-pie me-1"></i>توليد
+              </button>
+            </div>
+            <div class="col-md-2">
+              <button class="btn btn-outline-secondary w-100" id="btn-print-report" onclick="window.print()">
+                <i class="fas fa-print me-1"></i>طباعة
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-lg-6">
+          <div class="card">
+            <div class="card-header text-center"><i class="fas fa-bar-chart me-2"></i>المبيعات مقابل المشتريات</div>
+            <div class="card-body"><div class="chart-container"><canvas id="chart-sales-purchases"></canvas></div></div>
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <div class="card">
+            <div class="card-header text-center"><i class="fas fa-circle-dot me-2"></i>توزيع طرق الدفع</div>
+            <div class="card-body"><div class="chart-container"><canvas id="chart-payment-methods"></canvas></div></div>
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <div class="card">
+            <div class="card-header text-center"><i class="fas fa-gas-pump me-2"></i>أنواع الوقود (براميل)</div>
+            <div class="card-body"><div class="chart-container"><canvas id="chart-fuel-types"></canvas></div></div>
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <div class="card">
+            <div class="card-header text-center"><i class="fas fa-chart-line me-2"></i>المصاريف الشهرية</div>
+            <div class="card-body"><div class="chart-container"><canvas id="chart-expenses"></canvas></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mt-2">
+        <div class="card-header"><i class="fas fa-table me-2"></i>ملخص التقرير</div>
+        <div class="card-body">
+          <div class="row g-3" id="report-summary"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======= SETTINGS ======= -->
+    <section id="page-settings" class="page" style="display:none;">
+      <div class="row g-3">
+
+        <div class="col-lg-6">
+          <div class="settings-section">
+            <h5><i class="fas fa-building me-2"></i>إعدادات الشركة</h5>
+            <div class="mb-3">
+              <label class="form-label">اسم الشركة</label>
+              <input type="text" class="form-control" id="setting-company-name" />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">العنوان</label>
+              <input type="text" class="form-control" id="setting-address" />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">الهاتف</label>
+              <input type="text" class="form-control" id="setting-phone" />
+            </div>
+            <button class="btn btn-primary" id="btn-save-company">
+              <i class="fas fa-save me-1"></i>حفظ
+            </button>
+          </div>
+        </div>
+
+        <div class="col-lg-6">
+          <div class="settings-section">
+            <h5><i class="fas fa-palette me-2"></i>المظهر</h5>
+            <div class="row g-3">
+              <div class="col-6">
+                <label class="form-label">اللون الرئيسي</label>
+                <input type="color" class="form-control form-control-color w-100" id="setting-primary-color" value="#2c3e50" />
+              </div>
+              <div class="col-6">
+                <label class="form-label">اللون الثانوي</label>
+                <input type="color" class="form-control form-control-color w-100" id="setting-secondary-color" value="#3498db" />
+              </div>
+              <div class="col-6">
+                <label class="form-label">الخط</label>
+                <select class="form-select" id="setting-font">
+                  <option value="Amiri">Amiri</option>
+                  <option value="Noto Kufi Arabic">Noto Kufi Arabic</option>
+                  <option value="Tajawal">Tajawal</option>
+                </select>
+              </div>
+              <div class="col-6">
+                <label class="form-label">الوضع</label>
+                <select class="form-select" id="setting-theme">
+                  <option value="light">فاتح</option>
+                  <option value="dark">داكن</option>
+                </select>
+              </div>
+            </div>
+            <button class="btn btn-primary mt-3" id="btn-save-appearance">
+              <i class="fas fa-wand-magic-sparkles me-1"></i>تطبيق
+            </button>
+          </div>
+        </div>
+
+        <div class="col-lg-6">
+          <div class="settings-section">
+            <h5><i class="fas fa-coins me-2"></i>العملات</h5>
+            <div id="currencies-list" class="mb-3"></div>
+            <div class="row g-2">
+              <div class="col-4">
+                <input type="text" class="form-control" id="new-currency-code" placeholder="EUR" maxlength="5" />
+              </div>
+              <div class="col-5">
+                <input type="text" class="form-control" id="new-currency-name" placeholder="اسم العملة" />
+              </div>
+              <div class="col-3">
+                <button class="btn btn-primary w-100" id="btn-add-currency">
+                  <i class="fas fa-plus"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-6">
+          <div class="settings-section">
+            <h5><i class="fas fa-database me-2"></i>إعدادات Supabase</h5>
+            <div class="mb-2">
+              <span class="badge bg-success me-1">مجاني 100%</span>
+              <small class="text-muted">سجّل على supabase.com وأنشئ مشروعاً مجانياً</small>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Project URL</label>
+              <input type="url" class="form-control" id="setting-supabase-url"
+                placeholder="https://xxxx.supabase.co" />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Anon / Public Key</label>
+              <input type="text" class="form-control font-monospace" id="setting-supabase-key"
+                placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." />
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+              <button class="btn btn-primary" id="btn-save-supabase">
+                <i class="fas fa-save me-1"></i>حفظ
+              </button>
+              <button class="btn btn-outline-primary" id="btn-test-supabase">
+                <i class="fas fa-plug me-1"></i>اختبار الاتصال
+              </button>
+              <button class="btn btn-success" id="btn-sync-from-supabase">
+                <i class="fas fa-cloud-download-alt me-1"></i>سحب من Cloud
+              </button>
+              <button class="btn btn-outline-success" id="btn-push-to-supabase">
+                <i class="fas fa-cloud-upload-alt me-1"></i>رفع للـ Cloud
+              </button>
+            </div>
+            <div id="supabase-test-result" class="mt-2"></div>
+            <div class="mt-3 p-2 bg-light rounded border" style="font-size:.8rem;">
+              <strong>🛠 SQL التهيئة (شغّله مرة واحدة في SQL Editor):</strong>
+              <pre class="mt-1 mb-0" style="font-size:.72rem;white-space:pre-wrap;color:#2c3e50;">CREATE TABLE transactions (
+  id TEXT PRIMARY KEY, type TEXT,
+  payment_method TEXT, account_id TEXT, account_name TEXT,
+  date DATE, fuel_type TEXT, weight NUMERIC, density NUMERIC,
+  barrels NUMERIC, barrel_price NUMERIC,
+  amount1 NUMERIC, currency1 TEXT, amount2 NUMERIC, currency2 TEXT,
+  total_usd NUMERIC, notes TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE TABLE accounts (
+  id TEXT PRIMARY KEY, name TEXT, type TEXT,
+  phone TEXT, notes TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+ALTER TABLE transactions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE accounts ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "all_tx"  ON transactions FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "all_acc" ON accounts     FOR ALL USING (true) WITH CHECK (true);</pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-6">
+          <div class="settings-section">
+            <h5><i class="fas fa-user-shield me-2"></i>إدارة المستخدم</h5>
+            <div class="mb-3">
+              <label class="form-label">اسم المستخدم</label>
+              <input type="text" class="form-control" id="setting-username" />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">كلمة المرور الجديدة</label>
+              <input type="password" class="form-control" id="setting-new-password" placeholder="اتركها فارغة لعدم التغيير" />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">تأكيد كلمة المرور</label>
+              <input type="password" class="form-control" id="setting-confirm-password" />
+            </div>
+            <button class="btn btn-primary" id="btn-save-user">
+              <i class="fas fa-save me-1"></i>حفظ
+            </button>
+          </div>
+        </div>
+
+        <div class="col-lg-6">
+          <div class="settings-section">
+            <h5><i class="fas fa-database me-2"></i>النسخ الاحتياطي</h5>
+            <p class="text-muted small mb-2">تصدير جميع البيانات بصيغة JSON</p>
+            <button class="btn btn-success w-100 mb-3" id="btn-backup">
+              <i class="fas fa-download me-1"></i>تصدير البيانات
+            </button>
+            <p class="text-muted small mb-2">استيراد من ملف نسخة احتياطية</p>
+            <input type="file" id="import-file" accept=".json" style="display:none;" />
+            <button class="btn btn-outline-primary w-100" id="btn-restore">
+              <i class="fas fa-upload me-1"></i>استيراد البيانات
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </div><!-- /main-content -->
+</div><!-- /app-screen -->
+
+<!-- ======= MODAL: TRANSACTION ======= -->
+<div class="modal fade" id="modal-transaction" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modal-transaction-title">معاملة جديدة</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row g-3">
+          <div class="col-md-3 col-6">
+            <label class="form-label">نوع العملية <span class="text-danger">*</span></label>
+            <select class="form-select" id="tx-type">
+              <option value="">-- اختر --</option>
+              <option value="بيع">بيع</option>
+              <option value="شراء">شراء</option>
+              <option value="دفعة">دفعة</option>
+              <option value="مصاريف">مصاريف</option>
+            </select>
+          </div>
+          <div class="col-md-3 col-6">
+            <label class="form-label">طريقة الدفع <span class="text-danger">*</span></label>
+            <select class="form-select" id="tx-payment-method">
+              <option value="">-- اختر --</option>
+              <option value="نقدي">نقدي</option>
+              <option value="شام كاش">شام كاش</option>
+              <option value="إيداع مكتب الهرم">إيداع مكتب الهرم</option>
+              <option value="آجل">آجل</option>
+            </select>
+          </div>
+          <div class="col-md-3 col-6">
+            <label class="form-label">الحساب <span class="text-danger">*</span></label>
+            <select class="form-select" id="tx-account">
+              <option value="">-- اختر الحساب --</option>
+            </select>
+          </div>
+          <div class="col-md-3 col-6">
+            <label class="form-label">التاريخ <span class="text-danger">*</span></label>
+            <input type="date" class="form-control" id="tx-date" />
+          </div>
+
+          <!-- Fuel -->
+          <div class="col-12" id="fuel-section" style="display:none;">
+            <div class="section-label"><i class="fas fa-gas-pump"></i>بيانات الوقود</div>
+            <div class="row g-3">
+              <div class="col-md-2 col-6">
+                <label class="form-label">نوع الوقود</label>
+                <select class="form-select" id="tx-fuel-type">
+                  <option value="">-- اختر --</option>
+                  <option value="ديزل">ديزل</option>
+                  <option value="بنزين">بنزين</option>
+                  <option value="فيول أويل">فيول أويل</option>
+                  <option value="كيروسين">كيروسين</option>
+                  <option value="LPG">LPG</option>
+                </select>
+              </div>
+              <div class="col-md-2 col-6">
+                <label class="form-label">الوزن (كغ)</label>
+                <input type="number" class="form-control" id="tx-weight" step="0.01" min="0" placeholder="0.00" />
+              </div>
+              <div class="col-md-2 col-6">
+                <label class="form-label">الكثافة (كغ/لتر)</label>
+                <input type="number" class="form-control" id="tx-density" step="0.001" min="0" placeholder="0.000" />
+              </div>
+              <div class="col-md-2 col-6">
+                <label class="form-label">البراميل <small class="text-muted">(تلقائي)</small></label>
+                <input type="number" class="form-control readonly-field" id="tx-barrels" readonly placeholder="—" />
+              </div>
+              <div class="col-md-2 col-6">
+                <label class="form-label">سعر البرميل (USD)</label>
+                <input type="number" class="form-control" id="tx-barrel-price" step="0.01" min="0" placeholder="0.00" />
+              </div>
+              <div class="col-md-2 col-6">
+                <label class="form-label">الإجمالي (USD) <small class="text-muted">(تلقائي)</small></label>
+                <input type="number" class="form-control total-field readonly-field" id="tx-total" readonly placeholder="—" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Amounts -->
+          <div class="col-12">
+            <div class="section-label"><i class="fas fa-dollar-sign"></i>المبالغ</div>
+            <div class="row g-3">
+              <div class="col-md-3 col-6">
+                <label class="form-label">المبلغ الأول</label>
+                <input type="number" class="form-control" id="tx-amount1" step="0.01" min="0" placeholder="0.00" />
+              </div>
+              <div class="col-md-2 col-6">
+                <label class="form-label">العملة</label>
+                <select class="form-select" id="tx-currency1">
+                  <option value="USD">USD</option>
+                  <option value="TRY">TRY</option>
+                  <option value="SYP">SYP</option>
+                </select>
+              </div>
+              <div class="col-md-3 col-6">
+                <label class="form-label">المبلغ الثاني <small class="text-muted">(اختياري)</small></label>
+                <input type="number" class="form-control" id="tx-amount2" step="0.01" min="0" placeholder="0.00" />
+              </div>
+              <div class="col-md-2 col-6">
+                <label class="form-label">العملة</label>
+                <select class="form-select" id="tx-currency2">
+                  <option value="">--</option>
+                  <option value="USD">USD</option>
+                  <option value="TRY">TRY</option>
+                  <option value="SYP">SYP</option>
+                </select>
+              </div>
+              <div class="col-md-2 col-12">
+                <label class="form-label">ملاحظات</label>
+                <input type="text" class="form-control" id="tx-notes" placeholder="..." />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+        <button class="btn btn-primary" id="btn-save-transaction">
+          <i class="fas fa-save me-1"></i>حفظ العملية
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ======= MODAL: ACCOUNT ======= -->
+<div class="modal fade" id="modal-account" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modal-account-title">حساب جديد</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">اسم الحساب <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" id="acc-name" placeholder="اسم الشخص أو الشركة" />
+        </div>
+        <div class="mb-3">
+          <label class="form-label">النوع</label>
+          <select class="form-select" id="acc-type">
+            <option value="عميل">عميل</option>
+            <option value="مورد">مورد</option>
+            <option value="شريك">شريك</option>
+            <option value="آخر">آخر</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">رقم الهاتف</label>
+          <input type="tel" class="form-control" id="acc-phone" placeholder="+963..." />
+        </div>
+        <div class="mb-3">
+          <label class="form-label">ملاحظات</label>
+          <textarea class="form-control" id="acc-notes" rows="3"></textarea>
+        </div>
+        <input type="hidden" id="acc-id" />
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+        <button class="btn btn-primary" id="btn-save-account">
+          <i class="fas fa-save me-1"></i>حفظ
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ======= MODAL: CONFIRM ======= -->
+<div class="modal fade" id="modal-confirm" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">تأكيد الحذف</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p id="confirm-message">هل أنت متأكد من الحذف؟</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">إلغاء</button>
+        <button class="btn btn-danger btn-sm" id="btn-confirm-delete">
+          <i class="fas fa-trash me-1"></i>حذف
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap 5 JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- App Modules -->
+<script src="js/supabase.js"></script>
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/accounts.js"></script>
+<script src="js/transactions.js"></script>
+<script src="js/statement.js"></script>
+<script src="js/cashbox.js"></script>
+<script src="js/reports.js"></script>
+<script src="js/settings.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>

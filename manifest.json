@@ -1,0 +1,51 @@
+{
+  "name": "نظام المحاسبة الاحترافي",
+  "short_name": "محاسبة",
+  "description": "نظام محاسبة احترافي متكامل مع دعم متعدد العملات وإدارة الوقود",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#1a3c5e",
+  "theme_color": "#1a3c5e",
+  "orientation": "any",
+  "lang": "ar",
+  "dir": "rtl",
+  "categories": ["finance", "business", "productivity"],
+  "icons": [
+    {
+      "src": "assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/icons/icon-1024.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "معاملة جديدة",
+      "short_name": "جديد",
+      "description": "إضافة معاملة جديدة",
+      "url": "/?page=transactions",
+      "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "التقارير",
+      "short_name": "تقارير",
+      "description": "عرض التقارير",
+      "url": "/?page=reports",
+      "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
