@@ -1,9 +1,10 @@
-{
+﻿{
+  "id": "/alaqsa/",
   "name": "نظام المحاسبة الاحترافي",
   "short_name": "محاسبة",
   "description": "نظام محاسبة احترافي متكامل مع دعم متعدد العملات وإدارة الوقود",
-  "start_url": "/",
-  "scope": "/",
+  "start_url": "/alaqsa/index.html",
+  "scope": "/alaqsa/",
   "display": "standalone",
   "background_color": "#1a3c5e",
   "theme_color": "#1a3c5e",
@@ -31,21 +32,35 @@
       "purpose": "any maskable"
     }
   ],
-  "screenshots": [],
+  "screenshots": [
+    {
+      "src": "assets/screenshots/dashboard.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "label": "لوحة التحكم الرئيسية"
+    },
+    {
+      "src": "assets/screenshots/transactions.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "label": "شاشة العمليات المالية"
+    }
+  ],
   "shortcuts": [
     {
       "name": "معاملة جديدة",
       "short_name": "جديد",
       "description": "إضافة معاملة جديدة",
-      "url": "/?page=transactions",
+      "url": "/alaqsa/index.html?page=transactions",
       "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192" }]
     },
     {
       "name": "التقارير",
       "short_name": "تقارير",
       "description": "عرض التقارير",
-      "url": "/?page=reports",
+      "url": "/alaqsa/index.html?page=reports",
       "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192" }]
     }
-  ]
+  ],
+  "prefer_related_applications": false
 }
